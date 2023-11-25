@@ -240,9 +240,39 @@ having film_count > 70;
 select distinct rating
 from film;
 
+select count(*) 
+from employee;
+
+select e.emp_name, b.buseo_name, j.jikgup_name
+from employee as e
+inner join buseo as b on e.buseo=b.id
+inner join jikgup as j on e.jikgup=j.id
+order by b.id, j.id;
+
+select count(e.id) as buseo_inwon, b.buseo_name
+from employee as e
+inner join buseo as b on e.buseo=b.id
+inner join jikgup as j on e.jikgup=j.id
+group by b.id;
 
 
 
+create view employee_view as
+select e.emp_name, b.buseo_name, j.jikgup_name
+from employee as e
+inner join buseo as b on e.buseo=b.id
+inner join jikgup as j on e.jikgup=j.id
+order by b.id, j.id;
+
+select * from employee_view;
+
+select *
+from employee_view
+where emp_name like '양%';
+
+select *
+from employee_view
+where buseo_name like '인%';
 
 
 
