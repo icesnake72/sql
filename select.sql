@@ -117,31 +117,32 @@ where r.inventory_id=2346;
 
 -- 2개의 테이블 inner 조인
 SELECT
-    film.film_id,
-    film.title AS film_title,
-    actor.actor_id,
-    CONCAT(actor.first_name, ' ', actor.last_name) AS actor_name
-FROM
-    film
-inner JOIN
-    film_actor ON film.film_id = film_actor.film_id
-inner JOIN
-    actor ON film_actor.actor_id = actor.actor_id;
+    f.film_id,
+    f.title AS film_title,
+    a.actor_id,
+    CONCAT(a.first_name, ' ', a.last_name) AS actor_name
+    
+FROM film_actor as fa
+
+inner JOIN film as f ON f.film_id = fa.film_id
+
+inner JOIN actor as a ON fa.actor_id = a.actor_id
+
+order by film_title;
 
 
 
 -- 2개의 테이블 left 조인
 SELECT
-    film.film_id,
-    film.title AS film_title,
-    actor.actor_id,
-    CONCAT(actor.first_name, ' ', actor.last_name) AS actor_name
+    f.film_id,
+    f.title AS film_title,
+    a.actor_id,
+    CONCAT(a.first_name, ' ', a.last_name) AS actor_name
 FROM
-    film
-LEFT JOIN
-    film_actor ON film.film_id = film_actor.film_id
-LEFT JOIN
-    actor ON film_actor.actor_id = actor.actor_id;
+    film_actor as fa
+LEFT JOIN film as f ON fa.film_id = f.film_id
+LEFT JOIN actor as a ON fa.actor_id = a.actor_id;
+
 
 -- 2개의 테이블 right 조인
 SELECT
@@ -158,19 +159,17 @@ LEFT JOIN
 
 
 SELECT
-    customer.first_name,
-    customer.last_name,
+    concat(customer.first_name, ' ', customer.last_name) as customer_name,
     film.title
-FROM
-    rental
-JOIN
-    inventory ON rental.inventory_id = inventory.inventory_id
-JOIN
-    film ON inventory.film_id = film.film_id
-JOIN
-    customer ON rental.customer_id = customer.customer_id
-WHERE
-    rental.inventory_id = 2346;
+FROM rental
+
+inner JOIN inventory ON rental.inventory_id = inventory.inventory_id
+inner JOIN film ON inventory.film_id = film.film_id
+inner JOIN customer ON rental.customer_id = customer.customer_id
+
+WHERE rental.inventory_id = 2346;
+
+
 
 -- 배우 아이디가 1인 배우의 이름과 출연작들 가져오기
 select a.actor_id, a.first_name, a.last_name, f.film_id, f.title 
@@ -187,47 +186,41 @@ cross join customer as c
 where c.customer_id=r.customer_id;
 
 
+-- 등급 그룹으로 묶어서 해당 그룹의 통계정보를 구할때 사용한다.
 SELECT
     rating,
     AVG(length) AS average_length,
     COUNT(film_id) AS movie_count
-FROM
-    film
-GROUP BY
-    rating;
+FROM film
+GROUP BY rating;
     
     
+    
+-- 배우별로 출연작들의 갯수와 출연작들의 평균 러닝타임을 구한다
 SELECT
     actor.actor_id,
     CONCAT(actor.first_name, ' ', actor.last_name) AS actor_name,
     COUNT(film.film_id) AS movie_count,
     AVG(film.length) AS average_length
-FROM
-    actor
-JOIN
-    film_actor ON actor.actor_id = film_actor.actor_id
-JOIN
-    film ON film_actor.film_id = film.film_id
-GROUP BY
-    actor.actor_id, actor.first_name, actor.last_name;
+FROM actor
+JOIN film_actor ON actor.actor_id = film_actor.actor_id
+JOIN film ON film_actor.film_id = film.film_id
+GROUP BY actor.actor_id, actor.first_name, actor.last_name;
     
     
+-- 고객별로 렌탈횟수와 총이용 금액을 구한다
 SELECT
     customer.customer_id,
     CONCAT(customer.first_name, ' ', customer.last_name) AS customer_name,
     COUNT(rental.rental_id) AS rental_count,
     SUM(payment.amount) AS total_amount
-FROM
-    customer
-JOIN
-    rental ON customer.customer_id = rental.customer_id
-JOIN
-    payment ON rental.rental_id = payment.rental_id
-GROUP BY
-    customer.customer_id, customer.first_name, customer.last_name;
-    
+FROM customer
+JOIN rental ON customer.customer_id = rental.customer_id
+JOIN payment ON rental.rental_id = payment.rental_id
+GROUP BY customer.customer_id, customer.first_name, customer.last_name;
     
 
+-- 각 카테고리별 영화의 갯수를 구한다
 select count(fc.film_id) as film_count, c.name 
 from film_category as fc
 inner join category as c on c.category_id=fc.category_id
